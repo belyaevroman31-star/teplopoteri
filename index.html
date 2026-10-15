@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#1e3a8a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="description" content="PWA-калькулятор теплопотерь трубопровода радиаторного отопления. Расчет теплопотерь Вт/м, Вт, кВт и падения температуры °С/м, °С. BELYAEV_PROJECT" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="icon" type="image/png" href="icons/icon-192.png" />
+  <title>Расчет теплопотерь — PWA | BELYAEV_PROJECT</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <svg class="splash-curve" width="320" height="140" viewBox="0 0 520 180" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="g1" x1="40" y1="60" x2="480" y2="60" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#60a5fa"/>
+              <stop offset="1" stop-color="#818cf8"/>
+            </linearGradient>
+            <linearGradient id="g2" x1="40" y1="120" x2="480" y2="120" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#3b82f6"/>
+              <stop offset="1" stop-color="#60a5fa"/>
+            </linearGradient>
+          </defs>
+          <path d="M60 70 Q260 20 460 70" stroke="url(#g1)" stroke-width="20" fill="none" stroke-linecap="round"/>
+          <path d="M60 110 Q260 160 460 110" stroke="url(#g2)" stroke-width="20" fill="none" stroke-linecap="round"/>
+          <circle cx="60" cy="70" r="10" fill="#93c5fd"/>
+          <circle cx="460" cy="70" r="10" fill="#60a5fa"/>
+          <circle cx="60" cy="110" r="10" fill="#93c5fd"/>
+          <circle cx="460" cy="110" r="10" fill="#60a5fa"/>
+          <path d="M60 70 L60 110" stroke="#93c5fd" stroke-width="6" stroke-linecap="round"/>
+          <path d="M460 70 L460 110" stroke="#60a5fa" stroke-width="6" stroke-linecap="round"/>
+        </svg>
+        <h1 class="app-title">Расчет теплопотерь</h1>
+        <div class="project-tag">BELYAEV_PROJECT</div>
+      </div>
+      <nav class="topnav">
+        <a href="index.html" class="active">Оценочный расчёт</a>
+        <a href="sp.html">По СП / СНиП / ГОСТ</a>
+      </nav>
+      <p class="subtitle">PWA-калькулятор теплопотерь трубопровода системы радиаторного отопления. Учитывает температуру подачи, длину трассы, диаметр, способ прокладки, теплоизоляцию и рассчитывает падение температуры</p>
+    </header>
+
+    <form id="heatLossForm">
+      <div class="card">
+        <h2>1. Параметры теплоносителя</h2>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label for="tSupply">Температура подачи t<sub>п</sub></label>
+            <div class="input-wrapper">
+              <input type="number" id="tSupply" step="0.1" min="40" max="110" value="80" required />
+              <span class="unit">°С</span>
+            </div>
+            <p class="help-text">Обычно 70–90 °С для радиаторного отопления</p>
+          </div>
+          <div class="form-group">
+            <label for="tEnv">Температура окружающей среды t<sub>окр</sub></label>
+            <div class="input-wrapper">
+              <input type="number" id="tEnv" step="0.1" min="-40" max="40" value="20" required />
+              <span class="unit">°С</span>
+            </div>
+            <p class="help-text">Воздух помещения – 18–22 °С, неотапливаемое помещение – ниже</p>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top: clamp(10px,2vw,16px)">
+          <label for="flowRate">Расход теплоносителя G</label>
+          <div class="input-wrapper">
+            <input type="number" id="flowRate" step="0.01" min="0.01" max="10000" value="0.5" required />
+            <span class="unit">м³/ч</span>
+          </div>
+          <p class="help-text">Используется для расчёта потерь температуры °С/м и °С к концу трассы</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>2. Трубопровод (длина, диаметр, материал)</h2>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label for="pipeLength">Длина трубопровода L</label>
+            <div class="input-wrapper">
+              <input type="number" id="pipeLength" step="0.1" min="0.1" max="10000" value="10" required />
+              <span class="unit">м</span>
+            </div>
+            <p class="help-text">Суммарная длина трассы (прямая + подводки)</p>
+          </div>
+          <div class="form-group">
+            <label for="pipeMaterial">Материал трубы</label>
+            <select id="pipeMaterial">
+              <option value="steel">Стальная (черная/оцинкованная)</option>
+              <option value="pp">Полипропилен (PP-R/PP-RCT)</option>
+              <option value="pex">PEX/PEX-Al-PEX (металлопластик)</option>
+              <option value="pe">ПЭ/PERT</option>
+              <option value="cu">Медь</option>
+            </select>
+            <p class="help-text">Влияет преимущественно косвенно; основной фактор – диаметр и изоляция</p>
+          </div>
+        </div>
+        <h3>Типоразмер трубы (наружный диаметр)</h3>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label for="diameterType">Выбор типоразмера</label>
+            <select id="diameterType">
+              <option value="custom">Указать вручную (мм)</option>
+              <optgroup label="Стальная ВГП (ГОСТ 3262-75), наружный Ø мм">
+                <option value="15.9">Ду15 (Ø21.3)</option>
+                <option value="21.3">Ду20 (Ø26.8)</option>
+                <option value="26.8">Ду25 (Ø33.5)</option>
+                <option value="33.5">Ду32 (Ø42.3)</option>
+                <option value="42.3">Ду40 (Ø48.0)</option>
+                <option value="48.0">Ду50 (Ø60.0)</option>
+                <option value="60.3">Ду65 (Ø76.1)</option>
+                <option value="73.0">Ду80 (Ø88.9)</option>
+                <option value="88.9">Ду100 (Ø114.3)</option>
+              </optgroup>
+              <optgroup label="Полипропилен, наружный Ø мм">
+                <option value="20.0">PP 20×3.4 (Ø20)</option>
+                <option value="25.0">PP 25×4.2 (Ø25)</option>
+                <option value="32.0">PP 32×5.4 (Ø32)</option>
+                <option value="40.0">PP 40×6.7 (Ø40)</option>
+                <option value="50.0">PP 50×8.4 (Ø50)</option>
+                <option value="63.0">PP 63×10.5 (Ø63)</option>
+                <option value="75.0">PP 75×12.5 (Ø75)</option>
+                <option value="90.0">PP 90×15.0 (Ø90)</option>
+              </optgroup>
+              <optgroup label="Металлопластик, наружный Ø мм">
+                <option value="16.0">16х2.0 (Ø16)</option>
+                <option value="20.0">20х2.0 (Ø20)</option>
+                <option value="26.0">26х3.0 (Ø26)</option>
+                <option value="32.0">32х3.0 (Ø32)</option>
+                <option value="40.0">40х3.5 (Ø40)</option>
+                <option value="50.0">50х4.0 (Ø50)</option>
+              </optgroup>
+              <optgroup label="Медь, наружный Ø мм">
+                <option value="15.0">15 (Ø15)</option>
+                <option value="18.0">18 (Ø18)</option>
+                <option value="22.0">22 (Ø22)</option>
+                <option value="28.0">28 (Ø28)</option>
+                <option value="35.0">35 (Ø35)</option>
+                <option value="42.0">42 (Ø42)</option>
+                <option value="54.0">54 (Ø54)</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="outerDiameter">Наружный диаметр D<sub>н</sub></label>
+            <div class="input-wrapper">
+              <input type="number" id="outerDiameter" step="0.1" min="6" max="200" value="33.5" required />
+              <span class="unit">мм</span>
+            </div>
+            <p class="help-text">Чем больше диаметр – тем выше удельные теплопотери (Вт/м)</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>3. Способ прокладки и теплоизоляция</h2>
+        <h3>Место прокладки трубопровода</h3>
+        <div class="radio-group">
+          <label class="radio-item">
+            <input type="radio" name="layingType" value="indoor_open" checked />
+            <div class="radio-content">
+              <span class="radio-label">В отапливаемом помещении, открыто (по стене/перекрытию)</span>
+              <span class="radio-desc">Трубы не закрыты, хороший теплообмен с воздухом помещения</span>
+            </div>
+          </label>
+          <label class="radio-item">
+            <input type="radio" name="layingType" value="indoor_closed" />
+            <div class="radio-content">
+              <span class="radio-label">В отапливаемом помещении, в штробе/закрыты (стяжка, короб)</span>
+              <span class="radio-desc">Ухудшённая теплоотдача (ориентировочный расчёт)</span>
+            </div>
+          </label>
+          <label class="radio-item">
+            <input type="radio" name="layingType" value="unheated_room" />
+            <div class="radio-content">
+              <span class="radio-label">В неотапливаемом помещении (подвал, техническое помещение)</span>
+              <span class="radio-desc">Большая разность температур – теплопотери выше</span>
+            </div>
+          </label>
+          <label class="radio-item">
+            <input type="radio" name="layingType" value="crawl_space" />
+            <div class="radio-content">
+              <span class="radio-label">В подполье/канале (неотапливаемом)</span>
+              <span class="radio-desc">Ограниченный воздухообмен</span>
+            </div>
+          </label>
+          <label class="radio-item">
+            <input type="radio" name="layingType" value="outdoor" />
+            <div class="radio-content">
+              <span class="radio-label">Наружная прокладка (на улице/по воздуху)</span>
+              <span class="radio-desc">Ветер усиливает теплоотдачу – теплопотери максимальны</span>
+            </div>
+          </label>
+        </div>
+
+        <h3 style="margin-top: clamp(14px,2vw,20px)">Теплоизоляция трубопровода</h3>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label for="insulationType">Тип изоляции</label>
+            <select id="insulationType">
+              <option value="none">Без изоляции</option>
+              <option value="foam_pe">Пенополиэтилен (PE) — мягкая гильза</option>
+              <option value="mineral_wool">Минеральная вата (маты/цилиндры)</option>
+              <option value="ppu_shell">ППУ скорлупа</option>
+              <option value="rubber">Каучук вспененный (EPDM)</option>
+              <option value="foam">Пенополистирол скорлупа</option>
+              <option value="custom">Указать толщину вручную</option>
+            </select>
+            <p class="help-text">Изоляция существенно снижает теплопотери</p>
+          </div>
+          <div class="form-group" id="insulationThicknessGroup" class="hidden">
+            <label for="insulationThickness">Толщина теплоизоляции δ<sub>из</sub></label>
+            <div class="input-wrapper">
+              <input type="number" id="insulationThickness" step="1" min="0" max="100" value="20" />
+              <span class="unit">мм</span>
+            </div>
+            <p class="help-text">Рекомендуется подбирать по диаметру и условиям прокладки</p>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: clamp(10px,2vw,16px)">
+          <label for="safetyFactor">Коэффициент запаса</label>
+          <select id="safetyFactor">
+            <option value="1.00">1.00 (без запаса)</option>
+            <option value="1.05">1.05 (+5%)</option>
+            <option value="1.10" selected>1.10 (+10%) — рекомендуемый</option>
+            <option value="1.15">1.15 (+15%)</option>
+            <option value="1.20">1.20 (+20%) — для неотапливаемых/уличных</option>
+            <option value="1.30">1.30 (+30%)</option>
+          </select>
+          <p class="help-text">Учитывает фитинги, арматуру, повороты и прочие неучтённые потери</p>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button type="submit" class="btn-primary">Рассчитать теплопотери</button>
+        <button type="button" class="btn-secondary" id="resetBtn">Сбросить к значениям по умолчанию</button>
+      </div>
+
+      <div class="results" id="results">
+        <h2>Результаты расчёта</h2>
+        <div class="result-grid">
+          <div class="result-item">
+            <div class="result-label">Температура подачи t<sub>п</sub></div>
+            <div class="result-value" id="tAvg">— °С</div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">Разность температур Δt = t<sub>п</sub> – t<sub>окр</sub></div>
+            <div class="result-value" id="deltaT">— °С</div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">Наружный диаметр трубы D<sub>н</sub></div>
+            <div class="result-value" id="dOutMm">— мм</div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">Поверхность трубы на 1 м, F<sub>1м</sub></div>
+            <div class="result-value" id="surf1m">— м²/м</div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">Удельные теплопотери q</div>
+            <div class="result-value" id="qPerM">— Вт/м</div>
+            <div class="help-text" id="qNote"></div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">Теплопотери всего (без запаса)</div>
+            <div class="result-value" id="qTotalNoSafe">— Вт</div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">Коэффициент запаса</div>
+            <div class="result-value" id="safeFactorVal">—</div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">Теплопотери всего (с запасом)</div>
+            <div class="result-value big" id="qTotalSafe">— Вт</div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">Теплопотери всего (с запасом)</div>
+            <div class="result-value" id="qTotalKw">— кВт</div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">Потери температуры на 1 м трассы</div>
+            <div class="result-value" id="dtPerM">— °С/м</div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">Потери температуры к концу трассы (L)</div>
+            <div class="result-value" id="dtTotal">— °С</div>
+          </div>
+        </div>
+
+        <div class="formula-box">
+          <h4>Используемые формулы (информационно)</h4>
+          <p>Удельные теплопотери неизолированной трубы:</p>
+          <div class="formula">q<sub>1м,без</sub> = α<sub>н</sub> · π · D<sub>н</sub> / 1000 · (t<sub>п</sub> – t<sub>окр</sub>), [Вт/м]</div>
+          <p>Теплопотери с учётом изоляции:</p>
+          <div class="formula">q<sub>1м</sub> = q<sub>1м,без</sub> · K<sub>сн</sub>, [Вт/м]</div>
+          <p>Общие теплопотери:</p>
+          <div class="formula">Q = q<sub>1м</sub> · L · k<sub>зап</sub>, [Вт]</div>
+          <p>Падение температуры теплоносителя (вода):</p>
+          <div class="formula">Δt<sub>на 1 м</sub> = q<sub>1м</sub> / (G · ρ · c<sub>p</sub>), [°С/м]; &nbsp; Δt<sub>L</sub> = Δt<sub>на 1 м</sub> · L, [°С]</div>
+          <div class="note"><strong>Примечание:</strong> Расчёт ориентировочный (оценочный). Приняты приближения: ρ<sub>вода</sub> ≈ 970 кг/м³, c<sub>p,вода</sub> ≈ 4186 Дж/(кг·°С), G переведён в м³/с. Фактические значения зависят от режима эксплуатации.</div>
+        </div>
+      </div>
+    </form>
+
+    <footer>
+      <div>Расчет теплопотерь • PWA-приложение</div>
+      <div class="footer-project">BELYAEV_PROJECT</div>
+      <div style="margin-top:6px">Ориентировочный инженерный расчёт. Не замещает расчёт по действующим СП, СНиП, ГОСТ.</div>
+    </footer>
+  </div>
+
+  <div class="install-banner" id="installBanner">
+    <span>Установить приложение на устройство?</span>
+    <button class="install-btn" id="installBtn">Установить</button>
+    <button class="install-close" id="installClose">✕</button>
+  </div>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>

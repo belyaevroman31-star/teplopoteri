@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#1e3a8a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="description" content="Калькулятор теплопотерь трубопровода по СП 61.13330.2012, СП 41-103-2000, СП 60.13330.2020. BELYAEV_PROJECT" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="icon" type="image/png" href="icons/icon-192.png" />
+  <title>Расчет по СП, СНиП, ГОСТ — BELYAEV_PROJECT</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <svg class="splash-curve" width="300" height="120" viewBox="0 0 520 180" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="hg1" x1="40" y1="60" x2="480" y2="60" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#60a5fa"/><stop offset="1" stop-color="#818cf8"/>
+            </linearGradient>
+            <linearGradient id="hg2" x1="40" y1="120" x2="480" y2="120" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#3b82f6"/><stop offset="1" stop-color="#60a5fa"/>
+            </linearGradient>
+          </defs>
+          <path d="M60 70 Q260 20 460 70" stroke="url(#hg1)" stroke-width="20" fill="none" stroke-linecap="round"/>
+          <path d="M60 110 Q260 160 460 110" stroke="url(#hg2)" stroke-width="20" fill="none" stroke-linecap="round"/>
+          <circle cx="60" cy="70" r="10" fill="#93c5fd"/><circle cx="460" cy="70" r="10" fill="#60a5fa"/>
+          <circle cx="60" cy="110" r="10" fill="#93c5fd"/><circle cx="460" cy="110" r="10" fill="#60a5fa"/>
+        </svg>
+        <h1 class="app-title">Расчет по СП, СНиП, ГОСТ</h1>
+        <div class="project-tag">BELYAEV_PROJECT</div>
+      </div>
+      <nav class="topnav">
+        <a href="index.html">Оценочный расчёт</a>
+        <a href="sp.html" class="active">По СП / СНиП / ГОСТ</a>
+      </nav>
+      <p class="subtitle">Нормативный расчёт теплопотерь трубопровода по СП 61.13330.2012 «Тепловая изоляция оборудования и трубопроводов» (актуализированная редакция СНиП 41-03-2003), СП 41-103-2000 и СП 60.13330.2020</p>
+    </header>
+
+    <form id="spForm">
+      <div class="card">
+        <h2>1. Исходные данные</h2>
+        <div class="grid grid-3">
+          <div class="form-group">
+            <label for="spTv">Температура теплоносителя t<sub>в</sub></label>
+            <div class="input-wrapper">
+              <input type="number" id="spTv" step="0.1" min="20" max="400" value="90" required />
+              <span class="unit">°С</span>
+            </div>
+            <p class="help-text">Температура подачи в трубопроводе</p>
+          </div>
+          <div class="form-group">
+            <label for="spTn">Температура окружающей среды t<sub>н</sub></label>
+            <div class="input-wrapper">
+              <input type="number" id="spTn" step="0.1" min="-60" max="60" value="20" required />
+              <span class="unit">°С</span>
+            </div>
+            <p class="help-text">Помещение +20 °С (п. 6.1.5), подвал/улица — иные</p>
+          </div>
+          <div class="form-group">
+            <label for="spLength">Длина трассы L</label>
+            <div class="input-wrapper">
+              <input type="number" id="spLength" step="0.1" min="0.1" max="100000" value="50" required />
+              <span class="unit">м</span>
+            </div>
+            <p class="help-text">Суммарная длина участка</p>
+          </div>
+        </div>
+        <div class="grid grid-2" style="margin-top: clamp(10px,2vw,16px)">
+          <div class="form-group">
+            <label for="spFlow">Расход теплоносителя G</label>
+            <div class="input-wrapper">
+              <input type="number" id="spFlow" step="0.01" min="0.01" max="100000" value="3.5" required />
+              <span class="unit">м³/ч</span>
+            </div>
+            <p class="help-text">Для расчёта падения температуры по длине</p>
+          </div>
+          <div class="form-group">
+            <label for="spRegion">Климатический район (табл. 13 СП 61)</label>
+            <select id="spRegion">
+              <option value="eu">Европейская часть (K = 1,00)</option>
+              <option value="siberia">Урал, Западная и Восточная Сибирь (K = 0,98)</option>
+              <option value="far">Дальний Восток и Крайний Север (K = 0,96)</option>
+            </select>
+            <p class="help-text">Коэффициент к норме плотности теплового потока</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>2. Трубопровод и теплоизоляция</h2>
+        <div class="grid grid-3">
+          <div class="form-group">
+            <label for="spPipeMat">Материал трубы</label>
+            <select id="spPipeMat">
+              <option value="steel" selected>Сталь (ГОСТ 3262-75, ГОСТ 10704-91)</option>
+              <option value="ppr">Полипропилен PP-R (ГОСТ 32415-2013, DIN 8077/8078)</option>
+              <option value="pex">Сшитый полиэтилен PEX (DIN 16892)</option>
+              <option value="mp">Металлопластик PEX-AL-PEX (ГОСТ Р 53630-2015)</option>
+              <option value="copper">Медь (ГОСТ 617-2006, EN 1057)</option>
+            </select>
+            <p class="help-text">Учитывается сопротивление стенки трубы R<sub>тр</sub></p>
+          </div>
+          <div class="form-group">
+            <label for="spDnSelect">Типоразмер (наружный Ø × стенка)</label>
+            <select id="spDnSelect"></select>
+            <p class="help-text">Список зависит от материала трубы</p>
+          </div>
+          <div class="form-group">
+            <label for="spDn">Наружный диаметр d<sub>н</sub></label>
+            <div class="input-wrapper">
+              <input type="number" id="spDn" step="0.1" min="4" max="2000" value="89" required />
+              <span class="unit">мм</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-3" style="margin-top: clamp(10px,2vw,16px)">
+          <div class="form-group">
+            <label for="spWall">Толщина стенки трубы s</label>
+            <div class="input-wrapper">
+              <input type="number" id="spWall" step="0.1" min="0.1" max="100" value="4" required />
+              <span class="unit">мм</span>
+            </div>
+            <p class="help-text">Внутренний диаметр d<sub>вн</sub> = d<sub>н</sub> − 2·s</p>
+          </div>
+          <div class="form-group">
+            <label for="spMaterial">Материал теплоизоляции (Приложение Б СП 61)</label>
+            <select id="spMaterial">
+              <option value="mw_cyl_100">Минеральная вата, цилиндры, 100 кг/м³</option>
+              <option value="mw_cyl_80">Минеральная вата, цилиндры, 80 кг/м³</option>
+              <option value="mw_cyl_150">Минеральная вата, цилиндры, 150 кг/м³</option>
+              <option value="mw_mat_100">Маты минераловатные прошивные, 100 кг/м³</option>
+              <option value="mw_super_45">Супертонкое базальтовое волокно, 40–60 кг/м³</option>
+              <option value="glass_45">Супертонкое стеклянное волокно, 40–60 кг/м³</option>
+              <option value="ppu_50">Пенополиуретан (ППУ), 50 кг/м³</option>
+              <option value="ppu_40">Пенополиуретан (ППУ), 40 кг/м³</option>
+              <option value="ppu_70">Пенополиуретан (ППУ), 70 кг/м³</option>
+              <option value="rubber">Вспененный каучук (EPDM), 60–80 кг/м³</option>
+              <option value="pe_20">Пенополиэтилен, 20 кг/м³</option>
+              <option value="pe_50">Пенополиэтилен, 50 кг/м³</option>
+              <option value="ps_25">Пенополистирол, 25 кг/м³</option>
+              <option value="ps_17">Пенополистирол, 17 кг/м³</option>
+            </select>
+            <p class="help-text">λ = λ₀ + k·t<sub>m</sub>, Вт/(м·°С)</p>
+          </div>
+          <div class="form-group">
+            <label for="spThickness">Толщина изоляции δ<sub>из</sub></label>
+            <div class="input-wrapper">
+              <input type="number" id="spThickness" step="1" min="0" max="500" value="60" required />
+              <span class="unit">мм</span>
+            </div>
+            <p class="help-text">Однослойная цилиндрическая изоляция</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>3. Условия прокладки и потери через опоры</h2>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label for="spPlacement">Условия теплоотдачи (табл. В.2 СП 61)</label>
+            <select id="spPlacement">
+              <option value="indoor_high">В помещении, покрытие с высоким коэф. излучения</option>
+              <option value="indoor_low">В помещении, покрытие с низким коэф. излучения</option>
+              <option value="air_5">На открытом воздухе, ветер 5 м/с</option>
+              <option value="air_10" selected>На открытом воздухе, ветер 10 м/с</option>
+              <option value="air_15">На открытом воздухе, ветер 15 м/с</option>
+              <option value="channel">В канале (α = 11 Вт/(м²·°С))</option>
+            </select>
+            <p class="help-text">Определяет коэффициент теплоотдачи α<sub>н</sub></p>
+          </div>
+          <div class="form-group">
+            <label for="spK">Коэффициент дополнительных потерь K (табл. В.1)</label>
+            <select id="spK">
+              <option value="steel_movable_small">Стальные на подвижных опорах, DN до 150 — 1,2</option>
+              <option value="steel_movable_big">Стальные на подвижных опорах, DN 150 и более — 1,15</option>
+              <option value="steel_suspended">Стальные на подвесных опорах — 1,05</option>
+              <option value="nonmetal">Неметаллические трубы — 1,7</option>
+              <option value="channelless">Бесканальная прокладка — 1,15</option>
+              <option value="none">Без учёта дополнительных потерь — 1,0</option>
+            </select>
+            <p class="help-text">Учитывает теплопотери через крепления и опоры</p>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: clamp(10px,2vw,16px)">
+          <label>Ориентация трубопровода</label>
+          <div class="radio-group" style="flex-direction:row;flex-wrap:wrap">
+            <label class="radio-item">
+              <input type="radio" name="spOrient" value="horizontal" checked />
+              <span class="radio-label">Горизонтальный</span>
+            </label>
+            <label class="radio-item">
+              <input type="radio" name="spOrient" value="vertical" />
+              <span class="radio-label">Вертикальный</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: clamp(10px,2vw,16px)">
+          <label for="spNormCase">Расчётный случай по СП 61 (для нормы плотности теплового потока)</label>
+          <select id="spNormCase">
+            <option value="indoor_long">Помещение, более 5000 ч/год (табл. 4)</option>
+            <option value="indoor_short">Помещение, 5000 ч/год и менее (табл. 5)</option>
+            <option value="air_long">Открытый воздух, более 5000 ч/год (табл. 2)</option>
+          </select>
+          <p class="help-text">Нормы табл. 4–5 — при t<sub>н</sub> = 20 °С; табл. 2 — при среднегодовой t<sub>н</sub></p>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button type="submit" class="btn-primary">Рассчитать по нормативам</button>
+        <button type="button" class="btn-secondary" id="spResetBtn">Сбросить</button>
+      </div>
+
+      <div class="results" id="spResults">
+        <h2>Результаты нормативного расчёта</h2>
+
+        <!-- Вердикты -->
+        <div class="verdict" id="rVerdict">—</div>
+        <div class="verdict" id="rSurfVerdict">—</div>
+
+        <!-- Инфографика: сравнение с нормой -->
+        <div id="spNormBlock">
+          <h3>Сравнение с нормативной плотностью теплового потока</h3>
+          <div class="barchart">
+            <div class="bar-row">
+              <span class="bar-name">Факт</span>
+              <div class="bar-track"><div class="bar-fill fact" id="barQ"></div></div>
+              <span class="bar-val" id="barQLabel">—</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-name">Норма СП 61</span>
+              <div class="bar-track"><div class="bar-fill norm" id="barQnorm"></div></div>
+              <span class="bar-val" id="barQnormLabel">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Инфографика: температурный профиль -->
+        <h3>Изменение температуры по длине трассы</h3>
+        <svg id="tempProfile" viewBox="0 0 640 120" class="temp-profile" preserveAspectRatio="xMidYMid meet" aria-label="Температурный профиль"></svg>
+
+        <!-- Инфографика: температура поверхности -->
+        <h3>Температура поверхности изоляции (предел 35 °С)</h3>
+        <div class="gauge">
+          <div class="gauge-track">
+            <div class="gauge-fill" id="surfBar" style="width:0%"></div>
+            <div class="gauge-mark" id="surfMark" style="left:58%"></div>
+          </div>
+          <div class="gauge-scale"><span>0 °С</span><span>35 °С</span><span>60 °С</span></div>
+        </div>
+
+        <!-- Числовые результаты -->
+        <h3>Расчётные параметры</h3>
+        <div class="result-grid">
+          <div class="result-item"><div class="result-label">Материал трубы, λ<sub>тр</sub></div><div class="result-value" id="rPipeMat">—</div></div>
+          <div class="result-item"><div class="result-label">Внутренний диаметр d<sub>вн</sub></div><div class="result-value" id="rDvn">—</div></div>
+          <div class="result-item"><div class="result-label">Сопротивление стенки трубы R<sub>тр</sub></div><div class="result-value" id="rRtr">—</div></div>
+          <div class="result-item"><div class="result-label">Расчётная t материалов t<sub>m</sub></div><div class="result-value" id="rTm">—</div></div>
+          <div class="result-item"><div class="result-label">Теплопроводность изоляции λ</div><div class="result-value" id="rLambda">—</div></div>
+          <div class="result-item"><div class="result-label">Коэф. теплоотдачи α<sub>н</sub></div><div class="result-value" id="rAlpha">—</div></div>
+          <div class="result-item"><div class="result-label">Коэф. доп. потерь K</div><div class="result-value" id="rK">—</div></div>
+          <div class="result-item"><div class="result-label">Сопротивление изоляции R<sub>из</sub></div><div class="result-value" id="rRiz">—</div></div>
+          <div class="result-item"><div class="result-label">Сопротивление теплоотдаче R<sub>н</sub></div><div class="result-value" id="rRn">—</div></div>
+          <div class="result-item"><div class="result-label">Полное сопротивление R</div><div class="result-value" id="rRtot">—</div></div>
+          <div class="result-item"><div class="result-label">Удельные теплопотери q</div><div class="result-value warning" id="rQ">—</div></div>
+          <div class="result-item" id="itemQnorm"><div class="result-label">Норма q по СП 61</div><div class="result-value" id="rQnorm">—</div></div>
+          <div class="result-item"><div class="result-label">Теплопотери всего Q</div><div class="result-value big" id="rQtot">—</div></div>
+          <div class="result-item"><div class="result-label">Теплопотери Q, кВт</div><div class="result-value" id="rQkw">—</div></div>
+          <div class="result-item"><div class="result-label">Температура поверхности изоляции</div><div class="result-value" id="rSurf">—</div></div>
+          <div class="result-item"><div class="result-label">Падение температуры на 1 м</div><div class="result-value" id="rDtPerM">—</div></div>
+          <div class="result-item"><div class="result-label">Падение температуры по трассе</div><div class="result-value" id="rDtTot">—</div></div>
+          <div class="result-item"><div class="result-label">Температура в конце трассы</div><div class="result-value big" id="rTend">—</div></div>
+        </div>
+
+        <!-- Формулы -->
+        <div class="formula-box">
+          <h4>Методика расчёта (СП 61.13330.2012, Приложение В; СП 41-103-2000)</h4>
+          <p>Сопротивление стенки трубы (учитывается для всех материалов; для стали мало́):</p>
+          <div class="formula">R<sub>тр</sub> = ln(d<sub>н</sub> / d<sub>вн</sub>) / (2·π·λ<sub>тр</sub>), где d<sub>вн</sub> = d<sub>н</sub> − 2·s</div>
+          <p>Полное линейное термическое сопротивление изолированного трубопровода:</p>
+          <div class="formula">R = R<sub>тр</sub> + R<sub>из</sub> + R<sub>н</sub>, (м·°С)/Вт</div>
+          <p>Термическое сопротивление цилиндрического слоя изоляции (формула В.5):</p>
+          <div class="formula">R<sub>из</sub> = ln(d<sub>из</sub> / d<sub>н</sub>) / (2·π·λ<sub>из</sub>)</div>
+          <p>Сопротивление теплоотдаче на наружной поверхности:</p>
+          <div class="formula">R<sub>н</sub> = 1 / (π · d<sub>из</sub> · α<sub>н</sub>)</div>
+          <p>Линейная плотность теплового потока (формула В.17 с K):</p>
+          <div class="formula">q = K · (t<sub>в</sub> − t<sub>н</sub>) / (R<sub>тр</sub> + R<sub>из</sub> + R<sub>н</sub>), Вт/м</div>
+          <p>Температура поверхности изоляции и суммарные потери:</p>
+          <div class="formula">t<sub>пов</sub> = t<sub>в</sub> − q·(R<sub>тр</sub>+R<sub>из</sub>) = t<sub>н</sub> + q·R<sub>н</sub>; Q = q · L, Вт</div>
+          <p>Падение температуры теплоносителя (вода ρ ≈ 970 кг/м³, c<sub>p</sub> ≈ 4186 Дж/(кг·°С)):</p>
+          <div class="formula">Δt<sub>1м</sub> = q / (G/3600 · ρ · c<sub>p</sub>); Δt<sub>L</sub> = Δt<sub>1м</sub> · L</div>
+          <p>Теплопроводность изоляции по Приложению Б: λ<sub>из</sub> = λ₀ + k·t<sub>m</sub>, где t<sub>m</sub> = (t<sub>в</sub>+40)/2 (помещение/канал) или t<sub>в</sub>/2 (наружный воздух зимой).</p>
+          <p>Нормы плотности теплового потока (табл. 2, 4, 5) СП 61.13330.2012 приведены для <strong>стальных</strong> трубопроводов. Для труб из полимерных материалов (PP-R, PEX, металлопластик) и меди сравнение с этими нормами не выполняется — расчёт ведётся по общим формулам Приложения В с учётом R<sub>тр</sub>.</p>
+        </div>
+
+        <div class="note">
+          <strong>Нормативная база:</strong> СП 61.13330.2012 (акт. редакция СНиП 41-03-2003), СП 41-103-2000, СП 60.13330.2020 (п. 6.2.7), ГОСТ 3262-75, ГОСТ 10704-91, ГОСТ 32415-2013, ГОСТ Р 53630-2015, ГОСТ 617-2006, ГОСТ 31311-2022. Приложение Б (λ изоляции), табл. В.1 (K опор), табл. В.2 (α<sub>н</sub>), табл. 2–5 (нормы q для стали), табл. 13 (районный коэффициент). Расчёт носит справочный характер; для проектной документации требуется полный расчёт по СП 61.13330.
+        </div>
+      </div>
+    </form>
+
+    <footer>
+      <div>Расчет по СП, СНиП, ГОСТ • PWA-приложение</div>
+      <div class="footer-project">BELYAEV_PROJECT</div>
+      <div style="margin-top:6px">Справочно-информационный инструмент. Не заменяет обязательный расчёт в составе проектной документации.</div>
+    </footer>
+  </div>
+
+  <script src="assets/sp.js"></script>
+</body>
+</html>

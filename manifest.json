@@ -1,0 +1,26 @@
+{
+  "name": "Расчет теплопотерь",
+  "short_name": "Теплопотери",
+  "description": "PWA-калькулятор теплопотерь трубопровода системы радиаторного отопления. Расчет теплопотерь и падения температуры по длине трассы. Проект BELYAEV_PROJECT.",
+  "id": "/pwa_app/",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#1e3a8a",
+  "background_color": "#0f172a",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
